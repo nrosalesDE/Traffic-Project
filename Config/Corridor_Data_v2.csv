@@ -1,0 +1,43 @@
+Corridor,Point ID,City,Direction,Point_Type,Latitude,Longitude
+I-71,,Cincinnati,NB,South Entry (Bridge),39.0911,-84.5212
+I-71,,Cincinnati,NB,Downtown Core,39.0978,-84.5085
+I-71,,Cincinnati,NB,North Metro Exit (I-275),39.26536784,-84.35717718
+I-71,,Cincinnati,SB,North Metro Entry (I-275),39.27573701,-84.34448228
+I-71,,Cincinnati,SB,Downtown Core,39.0982,-84.5082
+I-71,,Cincinnati,SB,South Metro Exit (Bridge),39.0913,-84.521
+I-75,,Cincinnati,NB,South Metro Entry (Bridge),39.09126482,-84.52254402
+I-75,,Cincinnati,NB,North Metro Exit (I-275),39.2785,-84.4442
+I-75,,Cincinnati,SB,North Metro Entry (I-275),39.28001774,-84.44143109
+I-75,,Cincinnati,SB,South Metro Exit (Bridge),39.09125731,-84.52264702
+I-71,,Cleveland,NB,South Metro Entry (I-80),41.32327953,-81.81447832
+I-71,,Cleveland,NB,Downtown Terminus (I-90),41.4594561,-81.69508934
+I-71,,Cleveland,SB,Downtown Entry (I-90),41.45735914,-81.69946994
+I-71,,Cleveland,SB,South Metro Exit (I-80),41.30806265,-81.80959489
+I-71,,Columbus,NB,South Metro Entry (I-270),39.87976975,-83.04864512
+I-71,,Columbus,NB,Downtown Core (I-70 Split),39.94329583,-83.01208312
+I-71,,Columbus,SB,Downtown Core (I-70 Split),39.9575,-82.9915
+I-71,,Columbus,SB,South Metro Exit (I-270),39.87499708,-83.05219272
+I-70,,Columbus,EB,West Metro Entry (I-270),39.97693215,-83.14204302
+I-70,,Columbus,EB,Inner West (I-670),39.94961377,-83.02408773
+I-70,,Columbus,EB,Downtown Core (I-71 Split),39.9571,-82.9918
+I-70,,Columbus,EB,East Metro Exit (I-270),39.9322,-82.8251
+I-70,,Columbus,WB,East Metro Entry (I-270),39.9325,-82.8248
+I-70,,Columbus,WB,Downtown Core (I-71 Split),39.95417344,-82.9908084
+I-70,,Columbus,WB,Inner West (I-670),39.94995547,-83.02134522
+I-70,,Columbus,WB,West Metro Exit (I-270),39.97710682,-83.14010501
+I-75,,Dayton,NB,South Metro Entry (Austin Blvd),39.59486748,-84.23829073
+I-75,,Dayton,NB,Downtown Core (US-35),39.75263298,-84.20477103
+I-75,,Dayton,NB,North Metro Exit (I-70),39.87200128,-84.18818265
+I-75,,Dayton,SB,North Metro Entry (I-70),39.87225234,-84.18837893
+I-75,,Dayton,SB,Downtown Core (US-35),39.75375471,-84.20444939
+I-75,,Dayton,SB,South Metro Exit (Austin Blvd),39.59298627,-84.23997059
+I-70,,Dayton,EB,West Metro Entry (Brookville Rd),39.85242537,-84.41998016
+I-70,,Dayton,EB,Central Interchange (I-75),39.87207439,-84.1881873
+I-70,,Dayton,EB,East Metro Exit (SR-201),39.86880219,-84.12010739
+I-70,,Dayton,WB,East Metro Entry (SR-201),39.86894732,-84.12033396
+I-70,,Dayton,WB,Central Interchange (I-75),39.87182116,-84.18841887
+I-70,,Dayton,WB,West Metro Exit (Brookville Rd),39.85128732,-84.4219685
+I-75,,Toledo,NB,South Metro Entry (I-475),41.54099227,-83.61238341
+I-75,,Toledo,NB,North Metro Exit (I-280),41.66850166,-83.57099624
+I-75,,Toledo,SB,North Metro Entry (I-280),41.66760403,-83.56985183
+I-75,,Toledo,SB,South Metro Exit (I-475),41.53970003,-83.61410728
