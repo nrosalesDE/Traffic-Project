@@ -1,9 +1,10 @@
 import requests
 import os
-
-import os
 from dotenv import load_dotenv
+from datetime import datetime
 
+Time_Start = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+print(f"Time Start: {Time_Start}")
 load_dotenv()
 
 API_Key = os.getenv("TomTom_API_Key")
@@ -19,4 +20,6 @@ params = {
 
 response = requests.get(Base_URL, params=params)
 
-print(response.json())
+data = response.json()
+
+print(data["flowSegmentData"]["currentSpeed"])
