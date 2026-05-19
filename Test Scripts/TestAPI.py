@@ -20,6 +20,7 @@ Time_Start = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 Time_ID = datetime.now().strftime('%Y%m%d%H%M')
 
 load_dotenv()
+
 API_Key = os.getenv("TomTom_API_Key")
 Time_ID = datetime.now().strftime('%Y%m%d%H%M')
 

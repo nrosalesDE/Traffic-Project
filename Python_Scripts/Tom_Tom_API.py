@@ -3,7 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-from Load_Functions import load_Local
+from Load_Functions import load_Local_raw_json
 import logging
 import time
 
@@ -52,7 +52,7 @@ for corridor_name, corridor_df in corridors.groupby("Corridor"):
                 all_results.append({
                     "Corridor": row["Corridor"],
                     "Point_ID": row["Point_ID"],
-                    "Time ID": Time_ID,
+                    "Time_ID": Time_ID,
                     "Current_Speed": data["flowSegmentData"]["currentSpeed"],
                     "Free_Flow_Speed": data["flowSegmentData"]["freeFlowSpeed"],
                     "Current_Travel_Time": data["flowSegmentData"]["currentTravelTime"],
@@ -74,7 +74,7 @@ for corridor_name, corridor_df in corridors.groupby("Corridor"):
 
    # SAVE LOCAL JSON FILE LOCALLY. THIS WILL BE UPDATED TO SAVE TO AN S3 BUCKET
     try:
-        load_Local(all_results, corridor_name, Time_ID)
+        load_Local_raw_json(all_results, corridor_name, Time_ID)
         logging.info(f"Saved raw file for : {corridor_name}")
     except Exception as e:
         logging.error(f"Failed to save raw file for {corridor_name}: {e}")
