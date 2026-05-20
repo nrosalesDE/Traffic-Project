@@ -103,7 +103,7 @@ def filter_out_of_bounds_rows(df):
         invalid_rows.to_csv(error_path, index=False)
         logging.info(f"Out-of-bounds rows saved to {error_path}")
 
-        return df_filtered
+    return df_filtered
 
 
 def add_metrics(df):
