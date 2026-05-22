@@ -3,7 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime
-from Load_Functions import load_Local_raw_json
+from S3_Functions import upload_raw_json_to_s3
 import logging
 import time
 
@@ -77,7 +77,7 @@ def Run_Extraction():
 
     # SAVE LOCAL JSON FILE LOCALLY. THIS WILL BE UPDATED TO SAVE TO AN S3 BUCKET
         try:
-            load_Local_raw_json(all_results, corridor_name, Time_ID)
+            upload_raw_json_to_s3(all_results, corridor_name, Time_ID)
             logging.info(f"Saved raw file for : {corridor_name}")
         except Exception as e:
             logging.error(f"Failed to save raw file for {corridor_name}: {e}")

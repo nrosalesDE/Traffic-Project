@@ -2,13 +2,13 @@ import pandas as pd
 import json
 import os
 import Transform_Functions as tf
-from Load_Functions import load_Local_transformed_Parquet
+import S3_Functions
 from pathlib import Path
 import logging
 import shutil
 
-raw_data_path = "C:/GitRepos/Traffic-Project/Data/Raw"
-archive_path = "C:/GitRepos/Traffic-Project/Data/Archive"
+df = pd.read_json(
+    r"C:\GitRepos\Traffic-Project\Data\Raw\I-70_202605211954.json")
 
 
 def Transform_Data(df):
@@ -21,18 +21,5 @@ def Transform_Data(df):
     return df
 
 
-def process_raw_data():
-    logging.info("Transforming data.")
-    for file in Path(raw_data_path).glob("*.json"):
-        df = pd.read_json(file)
-        df = Transform_Data(df)
-        corridor = df['Corridor'].iloc[0]
-        time_id = df['Time_ID'].iloc[0]
-        load_Local_transformed_Parquet(df, corridor, time_id)
-        logging.info(
-            f"Data transformed successfully for {corridor} at {time_id}.")
-        shutil.move(file, Path(archive_path) / file.name)
-        logging.info(
-            f"Raw data archived successfully for {corridor} at {time_id}.")
-
-    logging.info("All data transformed successfully.")
+df = Transform_Data(df)
+S3_Functions.upload_transformed_parquet_to_s3(df)

@@ -1,6 +1,8 @@
 import pandas as pd
 import logging
 import os
+import S3_Functions
+
 
 logging.basicConfig(
     filename='Transform.log',
@@ -49,11 +51,12 @@ def check_for_nulls(df):
         logging.error(f"Error checking for nulls: {e}")
 
     if not invalid_rows.empty:
-        File_Name = f"{df['Corridor'].iloc[0]}_{df['Time_ID'].iloc[0]}_invalid_rows.csv"
-        file_Path = "C:/GitRepos/Traffic-Project/Data/Errors"
-        file_Path = os.path.join(file_Path, File_Name)
-        invalid_rows.to_csv(file_Path, index=False)
-        logging.info(f"Invalid rows saved to {file_Path}.")
+        try:
+            S3_Functions.upload_invalid_rows_to_s3(invalid_rows)
+            logging.info(f"Invalid rows uploaded to S3.")
+        except Exception as e:
+            logging.error(f"Error uploading invalid rows to S3: {e}")
+
     df = df.dropna()
 
     logging.info(f"{len(invalid_rows)} rows removed from the dataframe.")
@@ -95,14 +98,13 @@ def filter_out_of_bounds_rows(df):
     if not invalid_rows.empty:
         logging.info(
             f"Total invalid (out-of-bounds) rows found: {len(invalid_rows)}")
-        corridor = df['Corridor'].iloc[0] if 'Corridor' in df.columns else 'UnknownCorridor'
-        time_id = df['Time_ID'].iloc[0] if 'Time_ID' in df.columns else 'UnknownTime'
-        file_name = f"{corridor}_{time_id}_out_of_bounds_rows.csv"
-        error_path = os.path.join(
-            "C:/GitRepos/Traffic-Project/Data/Errors", file_name)
-        invalid_rows.to_csv(error_path, index=False)
-        logging.info(f"Out-of-bounds rows saved to {error_path}")
+        try:
+            S3_Functions.upload_out_of_bounds_rows_to_s3(invalid_rows)
+            logging.info(f"Out-of-bounds rows uploaded to S3.")
+        except Exception as e:
+            logging.error(f"Error uploading out-of-bounds rows to S3: {e}")
 
+    logging.info(f"{len(invalid_rows)} rows removed from the dataframe.")
     return df_filtered
 
 

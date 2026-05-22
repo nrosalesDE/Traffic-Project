@@ -87,3 +87,6 @@ def Run_Extraction():
 
     logging.info(f"Pipeline finished")
     logging.info(f"Runtime: {Run_Time:.2f} seconds")
+
+
+Run_Extraction()
