@@ -1,16 +1,18 @@
 import pandas as pd
 import requests
 import os
-from dotenv import load_dotenv
 from datetime import datetime
-from S3_Functions import upload_raw_json_to_s3
+from s3_load_raw import upload_raw_json_to_s3
 import logging
 import time
+from pathlib import Path
+import zoneinfo
 
 
 def Run_Extraction():
-    Start_Time = datetime.now()
-    Time_ID = datetime.now().strftime('%Y%m%d%H%M')
+
+    Start_Time = datetime.now(zoneinfo.ZoneInfo("US/Eastern"))
+    Time_ID = Start_Time.strftime('%Y%m%d%H%M')
 
     logging.basicConfig(
         filename='Tom_Tom_API.log',
@@ -20,14 +22,17 @@ def Run_Extraction():
 
     logging.info('Script started.')
 
-    load_dotenv()
     # API SET UP
-    API_Key = os.getenv("TomTom_API_Key")
-    Base_URL = "https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?"
+    API_Key = os.environ["TomTom_API_Key"]
+
+    Base_URL = os.environ["Flow_Segment_URL"]
+
+    Base_Dir = Path(__file__).resolve().parent
+
+    Corridor_File = Base_Dir / "Config" / "Corridor_Data_v2.csv"
 
     # LOAD INPUT VIA POINTS
-    corridors = pd.read_csv(
-        r"C:\GitRepos\Traffic-Project\Config\Corridor_Data_v2.csv")
+    corridors = pd.read_csv(Corridor_File)
 
     # START OF LOOP. FIRST ARRANGED BY CORRIDOR AND THEN BY POINT. EXAMPLE "I-71 HAS 14 POINTS TO RUN THROUGH"
     for corridor_name, corridor_df in corridors.groupby("Corridor"):
@@ -82,7 +87,7 @@ def Run_Extraction():
         except Exception as e:
             logging.error(f"Failed to save raw file for {corridor_name}: {e}")
 
-    End_Time = datetime.now()
+    End_Time = datetime.now(zoneinfo.ZoneInfo("US/Eastern"))
     Run_Time = (End_Time - Start_Time).total_seconds()
 
     logging.info(f"Pipeline finished")
