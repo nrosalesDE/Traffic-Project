@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 import os
-import S3_Functions
+import S3_Functions_transform
 
 
 logging.basicConfig(
@@ -52,7 +52,7 @@ def check_for_nulls(df):
 
     if not invalid_rows.empty:
         try:
-            S3_Functions.upload_invalid_rows_to_s3(invalid_rows)
+            S3_Functions_transform.upload_invalid_rows_to_s3(invalid_rows)
             logging.info(f"Invalid rows uploaded to S3.")
         except Exception as e:
             logging.error(f"Error uploading invalid rows to S3: {e}")
@@ -99,7 +99,8 @@ def filter_out_of_bounds_rows(df):
         logging.info(
             f"Total invalid (out-of-bounds) rows found: {len(invalid_rows)}")
         try:
-            S3_Functions.upload_out_of_bounds_rows_to_s3(invalid_rows)
+            S3_Functions_transform.upload_out_of_bounds_rows_to_s3(
+                invalid_rows)
             logging.info(f"Out-of-bounds rows uploaded to S3.")
         except Exception as e:
             logging.error(f"Error uploading out-of-bounds rows to S3: {e}")

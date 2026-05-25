@@ -13,9 +13,9 @@ logging.basicConfig(
 
 s3 = boto3.client("s3")
 
-bucket_name = "traffic-data-pipeline"
-s3_folder_transformed = "transformed"
-s3_folder_errors = "errors"
+bucket_name = os.environ["bucket_name"]
+s3_folder_transformed = os.environ["s3_folder_transformed"]
+s3_folder_errors = os.environ["s3_folder_errors"]
 
 
 def upload_invalid_rows_to_s3(invalid_rows):
