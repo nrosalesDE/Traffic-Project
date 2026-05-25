@@ -6,7 +6,6 @@ import io
 import logging
 
 logging.basicConfig(
-    filename='S3_Functions.log',
     level=logging.INFO,
     format='%(asctime)s %(levelname)s:%(message)s'
 )

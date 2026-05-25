@@ -15,7 +15,6 @@ def Run_Extraction():
     Time_ID = Start_Time.strftime('%Y%m%d%H%M')
 
     logging.basicConfig(
-        filename='Tom_Tom_API.log',
         level=logging.INFO,
         format='%(asctime)s %(levelname)s:%(message)s'
     )

@@ -5,7 +5,6 @@ import S3_Functions_transform
 
 
 logging.basicConfig(
-    filename='Transform.log',
     level=logging.INFO,
     format='%(asctime)s %(levelname)s:%(message)s'
 )
