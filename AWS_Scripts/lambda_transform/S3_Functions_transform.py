@@ -5,10 +5,7 @@ import boto3
 import io
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s:%(message)s'
-)
+logger = logging.getLogger(__name__)
 
 s3 = boto3.client("s3")
 
@@ -28,11 +25,11 @@ def upload_invalid_rows_to_s3(invalid_rows):
     try:
         s3.put_object(Bucket=bucket_name, Key=s3_key,
                       Body=buffer.getvalue(), ContentType="text/csv")
-        logging.info(f"Invalid rows uploaded to S3 at {s3_key}.")
+        logger.info(f"Invalid rows uploaded to S3 at {s3_key}.")
     except Exception as e:
-        logging.error(f"Error uploading invalid rows to S3: {e}")
+        logger.error(f"Error uploading invalid rows to S3: {e}")
 
-    logging.info(f"Invalid rows uploaded to S3 at {s3_key}.")
+    logger.info(f"Invalid rows uploaded to S3 at {s3_key}.")
 
 
 def upload_out_of_bounds_rows_to_s3(out_of_bounds_rows):
@@ -45,9 +42,9 @@ def upload_out_of_bounds_rows_to_s3(out_of_bounds_rows):
     try:
         s3.put_object(Bucket=bucket_name, Key=s3_key,
                       Body=buffer.getvalue(), ContentType="text/csv")
-        logging.info(f"Out-of-bounds rows uploaded to S3 at {s3_key}.")
+        logger.info(f"Out-of-bounds rows uploaded to S3 at {s3_key}.")
     except Exception as e:
-        logging.error(f"Error uploading out-of-bounds rows to S3: {e}")
+        logger.error(f"Error uploading out-of-bounds rows to S3: {e}")
 
 
 def upload_transformed_parquet_to_s3(df):
@@ -74,6 +71,6 @@ def upload_transformed_parquet_to_s3(df):
     try:
         s3.put_object(Bucket=bucket_name, Key=s3_key, Body=df.to_parquet(
         ), ContentType="application/octet-stream")
-        logging.info(f"Transformed parquet uploaded to S3 at {s3_key}.")
+        logger.info(f"Transformed parquet uploaded to S3 at {s3_key}.")
     except Exception as e:
-        logging.error(f"Error uploading transformed parquet to S3: {e}")
+        logger.error(f"Error uploading transformed parquet to S3: {e}")

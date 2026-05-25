@@ -1,6 +1,15 @@
+import logging
+
 import Transform
 import pandas as pd
 import S3_Functions_transform
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
 def lambda_handler(event, context):

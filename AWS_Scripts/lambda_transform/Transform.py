@@ -4,7 +4,6 @@ import os
 import Transform_Functions as tf
 import S3_Functions_transform
 from pathlib import Path
-import logging
 import shutil
 
 

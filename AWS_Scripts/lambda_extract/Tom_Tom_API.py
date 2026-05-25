@@ -8,18 +8,15 @@ import time
 from pathlib import Path
 import zoneinfo
 
+logger = logging.getLogger(__name__)
+
 
 def Run_Extraction():
 
     Start_Time = datetime.now(zoneinfo.ZoneInfo("US/Eastern"))
     Time_ID = Start_Time.strftime('%Y%m%d%H%M')
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s:%(message)s'
-    )
-
-    logging.info('Script started.')
+    logger.info('Script started.')
 
     # API SET UP
     API_Key = os.environ["TomTom_API_Key"]
@@ -36,7 +33,7 @@ def Run_Extraction():
     # START OF LOOP. FIRST ARRANGED BY CORRIDOR AND THEN BY POINT. EXAMPLE "I-71 HAS 14 POINTS TO RUN THROUGH"
     for corridor_name, corridor_df in corridors.groupby("Corridor"):
         all_results = []
-        logging.info(f"Starting corridor: {corridor_name}")
+        logger.info(f"Starting corridor: {corridor_name}")
         print(f"\nProcessing corridor: {corridor_name}")
 
         for _, row in corridor_df.iterrows():
@@ -74,20 +71,20 @@ def Run_Extraction():
                         time.sleep(0.2)  # Wait before retrying
                         continue
                     print(f"  ERROR: {lat},{lon} -> {e}")
-                    logging.error(
+                    logger.error(
                         f"Failed to process {corridor_name}: {e}")
-        logging.info(
+        logger.info(
             f"Received {len(all_results)} records for {corridor_name}")
 
     # SAVE LOCAL JSON FILE LOCALLY. THIS WILL BE UPDATED TO SAVE TO AN S3 BUCKET
         try:
             upload_raw_json_to_s3(all_results, corridor_name, Time_ID)
-            logging.info(f"Saved raw file for : {corridor_name}")
+            logger.info(f"Saved raw file for : {corridor_name}")
         except Exception as e:
-            logging.error(f"Failed to save raw file for {corridor_name}: {e}")
+            logger.error(f"Failed to save raw file for {corridor_name}: {e}")
 
     End_Time = datetime.now(zoneinfo.ZoneInfo("US/Eastern"))
     Run_Time = (End_Time - Start_Time).total_seconds()
 
-    logging.info(f"Pipeline finished")
-    logging.info(f"Runtime: {Run_Time:.2f} seconds")
+    logger.info(f"Pipeline finished")
+    logger.info(f"Runtime: {Run_Time:.2f} seconds")
