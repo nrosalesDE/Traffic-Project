@@ -67,8 +67,8 @@ def filter_out_of_bounds_rows(df):
     bounds = {
         "Current_Speed": (0, 120),
         "Free_Flow_Speed": (0, 120),
-        "Current_Travel_Time": (0, 300),
-        "Free_Flow_Travel_Time": (0, 300),
+        "Current_Travel_Time": (0, 1000),
+        "Free_Flow_Travel_Time": (0, 1000),
         "Confidence": (0, 1)
     }
 
