@@ -9,6 +9,7 @@ from pathlib import Path
 import zoneinfo
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def Run_Extraction():
@@ -25,7 +26,7 @@ def Run_Extraction():
 
     Base_Dir = Path(__file__).resolve().parent
 
-    Corridor_File = Base_Dir / "Config" / "Corridor_Data_v2.csv"
+    Corridor_File = Base_Dir / "Config" / "Corridor_Data_v4.csv"
 
     # LOAD INPUT VIA POINTS
     corridors = pd.read_csv(Corridor_File)

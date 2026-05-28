@@ -36,3 +36,5 @@ def process_raw_data():
             f"Raw data archived successfully for {corridor} at {time_id}.")
 
     logging.info("All data transformed successfully.")
+
+    print(df.dtypes)

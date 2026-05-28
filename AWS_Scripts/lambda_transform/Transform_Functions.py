@@ -5,6 +5,7 @@ import S3_Functions_transform
 
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def change_data_type(df):

@@ -6,6 +6,7 @@ import io
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 s3 = boto3.client("s3")
 
@@ -62,8 +63,7 @@ def upload_transformed_parquet_to_s3(df):
         f"month={month}/"
         f"day={day}/"
         f"hour={hour}/"
-        f"minute={minute}/"
-        f"transformed.parquet"
+        f"transformed_{minute}.parquet"
     )
     buffer = io.BytesIO()
     df.to_parquet(buffer, index=False)
