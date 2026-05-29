@@ -114,7 +114,8 @@ def add_metrics(df):
     df['Travel_Time_Difference'] = df['Current_Travel_Time'] - \
         df['Free_Flow_Travel_Time']
     logger.info("Calculated Travel_Time_Difference column.")
-    df['Congestion_Ratio'] = df['Speed_Difference'] / df['Free_Flow_Speed']
+    df['Congestion_Ratio'] = df['Current_Travel_Time'] / \
+        df['Free_Flow_Travel_Time']
     logger.info("Calculated Congestion_Ratio column.")
     df['Rush_Hour'] = df['Hour'].isin([6, 7, 8, 9, 16, 17, 18])
     logger.info("Calculated Rush_Hour column.")
