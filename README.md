@@ -34,65 +34,45 @@
 
 ## Architecture
 
+**TomTom API Data Pipeline Flow**
+
 ```mermaid
 flowchart TB
-    EB(["Amazon EventBridge\nEvery 15 minutes"])
-    API(["TomTom Flow Segment API"])
+    START([Start])
+    EB["Amazon EventBridge\nevery 15 min"]
+    L1["AWS Lambda\n(Python)"]
+    API["TomTom Flow\nSegment API"]
+    S3R["Amazon S3 (RAW)\nraw JSON"]
+    L2["AWS Lambda (Transformer)\n(data validation)"]
+    VALID{Valid?}
+    S3T["Amazon S3 (transformed)\nclean data"]
+    ATH["Amazon Athena\n(queries transformed)"]
+    PBI["Power BI Dashboard\n(spatial analytics)"]
+    END([End])
+    S3E["Amazon S3 (error)\nerrors"]
 
-    subgraph COMPUTE["Compute Layer"]
-        direction LR
-        EXT["Extract Lambda\nlambda_extract"]
-        TFX["Transform Lambda\nDocker + ECR"]
-    end
-
-    subgraph STORAGE["Amazon S3 — traffic-data-pipeline"]
-        direction LR
-        S3R[("raw/\nJSON per corridor")]
-        S3T[("transformed/\npartitioned Parquet")]
-        S3E[("errors/\ninvalid and out-of-bounds rows")]
-    end
-
-    subgraph ANALYTICS["Analytics Layer"]
-        direction LR
-        ATH["Amazon Athena"]
-        SQL["SQL Analytics\nfact_trafficdata_v2 + dim_point"]
-    end
-
-    subgraph LOCAL["Local Development Path"]
-        direction LR
-        LD1["Extract\nTom_Tom_API.py"] --> LD2[("Raw JSON")] --> LD3["Transform\nTransform.py"] --> LD4[("Parquet")]
-    end
-
-    EB --> EXT
-    API --> EXT
-    EXT --> S3R
-    S3R -->|S3 object created| TFX
-    TFX --> S3T
-    TFX --> S3E
+    START --> EB
+    EB --> L1
+    L1 -->|calls| API
+    API --> S3R
+    S3R -->|S3 Event triggers| L2
+    L2 --> VALID
+    VALID -->|Yes| S3T
+    VALID -.->|No| S3E
     S3T --> ATH
-    ATH --> SQL
+    ATH --> PBI
+    PBI --> END
 
-    API -.-> LD1
-    LD4 -.->|validation| ATH
+    classDef process fill:#B3D9FF,stroke:#4A90D9,color:#1A1A1A,stroke-width:2px
+    classDef decision fill:#FFB6C1,stroke:#E8879B,color:#1A1A1A,stroke-width:2px
+    classDef terminal fill:#B3D9FF,stroke:#4A90D9,color:#1A1A1A,stroke-width:2px
 
-    classDef trigger fill:#146EB4,stroke:#0F4C81,color:#FFFFFF,stroke-width:2px
-    classDef external fill:#232F3E,stroke:#161E2D,color:#FFFFFF,stroke-width:2px
-    classDef lambda fill:#FF9900,stroke:#EC7211,color:#161E2D,stroke-width:2px
-    classDef s3 fill:#3F7D20,stroke:#2D5A17,color:#FFFFFF,stroke-width:2px
-    classDef analytics fill:#7B3FE4,stroke:#5B2CA0,color:#FFFFFF,stroke-width:2px
-    classDef local fill:#EAF2F8,stroke:#0073BB,color:#161E2D,stroke-width:1px
-
-    class EB trigger
-    class API external
-    class EXT,TFX lambda
-    class S3R,S3T,S3E s3
-    class ATH,SQL analytics
-    class LD1,LD2,LD3,LD4 local
+    class EB,L1,API,S3R,L2,S3T,ATH,PBI,S3E process
+    class VALID decision
+    class START,END terminal
 ```
 
-**Production path:** EventBridge invokes Extract Lambda on a 15-minute schedule. Raw JSON lands in S3 `raw/`, which triggers Transform Lambda. Valid records are written to partitioned Parquet in `transformed/`; failed validation rows go to `errors/`. Athena queries the curated data using SQL scripts.
-
-**Local path:** The same extract and transform logic runs from `Python_Scripts/` for development and validation before deployment.
+EventBridge runs every 15 minutes and invokes the Extract Lambda, which calls the TomTom Flow Segment API and writes raw JSON to S3. An S3 event triggers the Transform Lambda to validate the data — valid records land in `transformed/` as clean Parquet, invalid rows go to `errors/`. Athena queries the transformed data, which feeds a Power BI dashboard for spatial congestion analytics.
 
 ---
 
