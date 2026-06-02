@@ -36,42 +36,63 @@
 
 ```mermaid
 flowchart TB
+    EB(["Amazon EventBridge\nEvery 15 minutes"])
     API(["TomTom Flow Segment API"])
 
-    subgraph LOCAL["Local Development Path"]
-        direction TB
-        LOCAL_EXT["Extract\nTom_Tom_API.py"]
-        LOCAL_RAW[("Raw JSON\nData/Raw")]
-        LOCAL_TFX["Transform\nTransform.py"]
-        LOCAL_PARQUET[("Parquet\nData/Transformed")]
-        LOCAL_EXT --> LOCAL_RAW --> LOCAL_TFX --> LOCAL_PARQUET
+    subgraph COMPUTE["Compute Layer"]
+        direction LR
+        EXT["Extract Lambda\nlambda_extract"]
+        TFX["Transform Lambda\nDocker + ECR"]
     end
 
-    subgraph AWS["AWS Production Path"]
-        direction TB
-        AWS_EXT["Extract Lambda\nlambda_extract"]
-        S3_RAW[("Amazon S3\nraw/")]
-        AWS_TFX["Transform Lambda\nDocker + ECR"]
-        S3_PARQUET[("Amazon S3\ntransformed/ partitioned")]
-        AWS_EXT --> S3_RAW --> AWS_TFX --> S3_PARQUET
+    subgraph STORAGE["Amazon S3 — traffic-data-pipeline"]
+        direction LR
+        S3R[("raw/\nJSON per corridor")]
+        S3T[("transformed/\npartitioned Parquet")]
+        S3E[("errors/\ninvalid and out-of-bounds rows")]
     end
 
     subgraph ANALYTICS["Analytics Layer"]
-        direction TB
-        WH[("Data Warehouse\nfact_trafficdata_v2 + dim_point")]
-        SQL["SQL Analytics\nSQL Scripts"]
-        WH --> SQL
+        direction LR
+        ATH["Amazon Athena"]
+        SQL["SQL Analytics\nfact_trafficdata_v2 + dim_point"]
     end
 
-    API --> LOCAL_EXT
-    API --> AWS_EXT
-    LOCAL_PARQUET -.->|dev and validation| WH
-    S3_PARQUET --> WH
+    subgraph LOCAL["Local Development Path"]
+        direction LR
+        LD1["Extract\nTom_Tom_API.py"] --> LD2[("Raw JSON")] --> LD3["Transform\nTransform.py"] --> LD4[("Parquet")]
+    end
+
+    EB --> EXT
+    API --> EXT
+    EXT --> S3R
+    S3R -->|S3 object created| TFX
+    TFX --> S3T
+    TFX --> S3E
+    S3T --> ATH
+    ATH --> SQL
+
+    API -.-> LD1
+    LD4 -.->|validation| ATH
+
+    classDef trigger fill:#146EB4,stroke:#0F4C81,color:#FFFFFF,stroke-width:2px
+    classDef external fill:#232F3E,stroke:#161E2D,color:#FFFFFF,stroke-width:2px
+    classDef lambda fill:#FF9900,stroke:#EC7211,color:#161E2D,stroke-width:2px
+    classDef s3 fill:#3F7D20,stroke:#2D5A17,color:#FFFFFF,stroke-width:2px
+    classDef analytics fill:#7B3FE4,stroke:#5B2CA0,color:#FFFFFF,stroke-width:2px
+    classDef local fill:#EAF2F8,stroke:#0073BB,color:#161E2D,stroke-width:1px
+
+    class EB trigger
+    class API external
+    class EXT,TFX lambda
+    class S3R,S3T,S3E s3
+    class ATH,SQL analytics
+    class LD1,LD2,LD3,LD4 local
 ```
 
-**Local path** (left branch): used for development, testing, and iteration before AWS deployment.
+**Production path:** EventBridge invokes Extract Lambda on a 15-minute schedule. Raw JSON lands in S3 `raw/`, which triggers Transform Lambda. Valid records are written to partitioned Parquet in `transformed/`; failed validation rows go to `errors/`. Athena queries the curated data using SQL scripts.
 
-**AWS path** (right branch): production serverless pipeline — Extract Lambda writes raw JSON to S3; Transform Lambda is triggered on upload and writes partitioned Parquet back to S3.
+**Local path:** The same extract and transform logic runs from `Python_Scripts/` for development and validation before deployment.
 
 ---
 
