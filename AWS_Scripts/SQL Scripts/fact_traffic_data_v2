@@ -1,0 +1,64 @@
+point_id
+string
+
+current_speed
+int
+
+free_flow_speed
+int
+
+current_travel_time
+int
+
+free_flow_travel_time
+int
+
+confidence
+double
+
+road_closure
+boolean
+
+date_time
+timestamp
+
+minute
+int
+
+speed_difference
+int
+
+travel_time_difference
+int
+
+congestion_ratio
+double
+
+rush_hour
+boolean
+
+day_of_week
+string
+
+weekend
+boolean
+
+congestion_category
+string
+
+corridor
+string (Partitioned)
+
+year
+int (Partitioned)
+
+month
+int (Partitioned)
+
+day
+int (Partitioned)
+
+hour
+int (Partitioned)
+
+

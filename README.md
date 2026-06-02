@@ -10,7 +10,7 @@
 
 ## About This Project
 
-**This project is designed to create an automated congestion tracker for major logistics routes in Ohio. With this data there will be a better understanding of the traffic trends and allow for more intentional routing descisions. **
+**This project is designed to create an automated congestion tracker for major logistics routes in Ohio. With this data there will be a better understanding of the traffic trends and allow for more intentional routing descisions. All monitoring points were placed near major highway connections as well as the entrances/exits to the major cities. **
 
 
 | | |
