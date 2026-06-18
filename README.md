@@ -3,6 +3,7 @@
 > Real-time traffic ingestion and analytics pipeline for Ohio interstate corridors, built with Python and AWS.
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![SQL](https://img.shields.io/badge/SQL-blue?logo=postgresql&logoColor=white)](https://en.wikipedia.org/wiki/SQL)
 [![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20S3%20%7C%20ECR%20%7C%20Athena-orange?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 [![TomTom API](https://img.shields.io/badge/Data-TomTom%20Traffic%20API-red)](https://developer.tomtom.com/)
 
@@ -17,8 +18,7 @@
 |---|---|
 | **Role** | [Solo Developer] |
 | **Timeline** | [May 2026 – Present] |
-| **Status** | [In Progress / Production / Portfolio Demo] |
-| **Repository** | [Public GitHub URL if applicable] |
+| **Status** | [In Progress] |
 
 ---
 
@@ -34,45 +34,7 @@
 
 ## Architecture
 
-**TomTom API Data Pipeline Flow**
-
-```mermaid
-flowchart TB
-    START([Start])
-    EB["Amazon EventBridge\nevery 15 min"]
-    L1["AWS Lambda\n(Python)"]
-    API["TomTom Flow\nSegment API"]
-    S3R["Amazon S3 (RAW)\nraw JSON"]
-    L2["AWS Lambda (Transformer)\n(data validation)"]
-    VALID{Valid?}
-    S3T["Amazon S3 (transformed)\nclean data"]
-    ATH["Amazon Athena\n(queries transformed)"]
-    PBI["Power BI Dashboard\n(spatial analytics)"]
-    END([End])
-    S3E["Amazon S3 (error)\nerrors"]
-
-    START --> EB
-    EB --> L1
-    L1 -->|calls| API
-    API --> S3R
-    S3R -->|S3 Event triggers| L2
-    L2 --> VALID
-    VALID -->|Yes| S3T
-    VALID -.->|No| S3E
-    S3T --> ATH
-    ATH --> PBI
-    PBI --> END
-
-    classDef process fill:#B3D9FF,stroke:#4A90D9,color:#1A1A1A,stroke-width:2px
-    classDef decision fill:#FFB6C1,stroke:#E8879B,color:#1A1A1A,stroke-width:2px
-    classDef terminal fill:#B3D9FF,stroke:#4A90D9,color:#1A1A1A,stroke-width:2px
-
-    class EB,L1,API,S3R,L2,S3T,ATH,PBI,S3E process
-    class VALID decision
-    class START,END terminal
-```
-
-EventBridge runs every 15 minutes and invokes the Extract Lambda, which calls the TomTom Flow Segment API and writes raw JSON to S3. An S3 event triggers the Transform Lambda to validate the data — valid records land in `transformed/` as clean Parquet, invalid rows go to `errors/`. Athena queries the transformed data, which feeds a Power BI dashboard for spatial congestion analytics.
+![TomTom API Data Pipeline Flow](docs/architecture-diagram.png)
 
 ---
 
@@ -81,11 +43,12 @@ EventBridge runs every 15 minutes and invokes the Extract Lambda, which calls th
 | Layer | Technologies |
 |-------|--------------|
 | **Language** | Python 3.x |
-| **Data** | Pandas, PyArrow, Parquet |
-| **API** | TomTom Traffic Flow Segment API, `requests` |
-| **Cloud** | AWS Lambda, S3, ECR, IAM |
+| **Data** | Pandas, PyArrow, Parquet, Requests |
+| **API** | TomTom Traffic Flow Segment API |
+| **Cloud** | AWS Lambda, S3, ECR, IAM, Athena, Event Bridge |
 | **DevOps** | Docker, PowerShell deploy scripts, AWS CLI |
 | **Analytics** | SQL (fact/dimension model) |
+| **Development Environment** | Cursor, ChatGPT-assisted development  |
 
 ---
 
@@ -101,61 +64,30 @@ EventBridge runs every 15 minutes and invokes the Extract Lambda, which calls th
 ### Transform
 
 - Coerces types and parses datetime fields
-- Validates nulls and filters out-of-bounds values (speed, travel time, confidence)
+- Validates nulls and filters out-of-bounds values
 - Computes derived metrics: speed difference, travel time difference, congestion ratio, rush hour flags
 - Assigns congestion categories: **Normal**, **Moderate**, **Heavy**, **Closure**
 - Outputs Parquet partitioned by `corridor / year / month / day / hour`
 
-| Congestion Category | Rule |
-|---------------------|------|
-| **Closure** | `Road_Closure == true` |
-| **Heavy** | `Congestion_Ratio >= 1.5` |
-| **Moderate** | `Congestion_Ratio >= 1.2` |
-| **Normal** | All other cases |
 
 ### Analyze
 
-Example query — highest-congestion monitoring points:
+All Data is fed from the transformed S3 folder through Athena in which views are created to allow for seamless Power BI queries. Each view either filters todays totals or keeps a running total of the past 7 days, while creating aggregates such as max congestion ratio, heavy/moderate congestion counts, among others.
 
-```sql
-SELECT DISTINCT d.point_id,
-       MAX(congestion_ratio) AS highest_congestion_ratio,
-       d.point_type, d.corridor, d.city, d.direction
-FROM fact_trafficdata_v2 f
-JOIN dim_point d ON f.point_id = d.point_id
-GROUP BY d.point_id, d.point_type, d.corridor, d.city, d.direction
-ORDER BY highest_congestion_ratio DESC
-LIMIT 10;
-```
 
----
+Once the data is uploaded to Power BI it is seperated into three dashboards (Overview, Points, and Map). Each page can be filtered using a slicer to view specific corridors and points.
 
-## Sample Output
+#### Overview
 
-**[Add a screenshot, sample chart, or table here.]**
+![Power BI Overview Dashboard](docs/Overview.png)
 
-| Corridor | City | Congestion Category | Congestion Ratio |
-|----------|------|---------------------|------------------|
-| I-71 | Cincinnati | Heavy | 1.62 |
-| I-75 | Dayton | Moderate | 1.28 |
-| I-70 | Columbus | Normal | 0.94 |
+#### Points
 
-*Replace with real results from your pipeline or warehouse.*
+![Power BI Points Dashboard](docs/Points.png)
 
----
+#### Map
 
-## Project Structure
-
-```
-Traffic-Project/
-├── Python_Scripts/              # Local ETL pipeline
-├── AWS_Scripts/
-│   ├── lambda_extract/          # API extraction → S3
-│   ├── lambda_transform/        # S3-triggered transform → Parquet
-│   └── SQL Scripts/             # Analytics queries
-├── Test Scripts/                # API and S3 smoke tests
-└── Data/                        # Local raw, transformed, archive, errors
-```
+![Power BI Map Dashboard](docs/Map.png)
 
 ---
 
@@ -171,79 +103,31 @@ Traffic-Project/
 
 ---
 
-## Getting Started
 
-### Prerequisites
-
-- Python 3.x
-- [TomTom Developer API key](https://developer.tomtom.com/)
-- AWS CLI + Docker (for Lambda deployment)
-
-### Environment Variables
-
-```env
-# Local (.env in Python_Scripts/)
-TomTom_API_Key=your_key_here
-
-# AWS Extract Lambda
-TomTom_API_Key=your_key_here
-Flow_Segment_URL=https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?
-
-# AWS Transform Lambda
-bucket_name=traffic-data-pipeline
-s3_folder_transformed=transformed
-s3_folder_errors=errors
-```
-
-> `.env` files are gitignored. Do not commit API keys.
-
-### Run Locally
-
-```powershell
-cd Python_Scripts
-python Main.py
-```
-
-### Deploy Transform Lambda
-
-```powershell
-cd AWS_Scripts/lambda_transform
-.\deploy-transform-lambda.ps1
-```
-
----
 
 ## Challenges & Learnings
 
-**[Fill in 2–4 bullets — recruiters and hiring managers read this section.]**
+- **Challenge:** Utilizing AWS services that I had never used before 
+  **Solution:** In order order to mitigate some of the fricting for development I chose to build a local model first, before moving into AWS. This allowed for small changes to be made with the core workflow already in place
 
-- **Challenge:** [What was hard — e.g. handling API rate limits or inconsistent responses]  
-  **Solution:** [What you did — e.g. retry logic, validation layer, error exports to S3]
+- **Challenge:** Dealing with the layer size limit for Lambda  
+  **Solution:** While it did add a bit more complexity I utilized docker images to bypass the size limit for the Transform Lambda, which was too big with Pandas and Pyarrow. This added another software tool to learn, however it was necessary to keep my final transform files as a parquet.
 
-- **Challenge:** [e.g. packaging Pandas/PyArrow for Lambda]  
-  **Solution:** [e.g. Docker-based Lambda with ECR deployment script]
+  **Challenge:** Athena reading too much data when I would run a query
+  **Solution:** I had the foresight to partition my final files in s3. However, I did not realize that Athena still needed queries to have the partitions in the where statements or it would try to load the whole folder. To fix this I built my views to be dynamic to select the current date and running weekday day totals.
 
-- **Learning:** [e.g. partitioning Parquet by corridor and time improved query performance for downstream analytics]
+- **Learning:** - The most important takeaway that I have from creating this project is taking an idea and turning it into actionable steps. While a system can look intimidating from a big picture perspective it can be broken into smaller goals that can be acheived.
+
+- Another key takeaway would be while using Cursor and ChatGPT has helped speed up the progress on my project tremendously, there are still things that need to be verified. For example, using Athena was a great learning experience, but if I were to do this project again or continue improving it I would switch to a more traditional database structure to avoid some of the Athena cost issues that I came across.
+
 
 ---
 
 ## Future Improvements
 
-- [ ] [e.g. EventBridge schedule for automated extraction]
-- [ ] [e.g. Glue/Redshift load automation]
-- [ ] [e.g. Dashboard in QuickSight or Grafana]
-- [ ] [e.g. CI/CD pipeline for Lambda deployments]
-- [ ] [e.g. Unit tests for transform functions]
+- The biggest limiting factor for this project was staying under the Tom Tom free tier limits. If I had the ability to go beyond those limits I would be able to completely refactor the input portion of my workflow. Instead of using a static spreadsheet I would be able to take user input for specific routes and break them into points that could be ran through the same extract and transform scripts. Or in general I would be able to create a broader range of points and gain further insights.
+
+- I would also like to update the retry logic on my extract script to be more dynamic based on the type of error that I receive.
+
 
 ---
-
-## Contact
-
-**[Your Name]**  
-[LinkedIn](https://linkedin.com/in/your-profile) · [Portfolio](https://your-portfolio.com) · [Email](mailto:you@example.com)
-
----
-
-## License
-
-[MIT / Unlicensed / All Rights Reserved — your choice]

@@ -1,4 +1,4 @@
-Corridor,Point_ID,City,Direction,Point_Type,Latitude,Longitude
+Corridor,Point_ID,City,Direction,Point_Desc,Latitude,Longitude
 I-71,I71_CIN_1,Cincinnati,NB,South Entry (Bridge),39.0911,-84.5212
 I-71,I71_CIN_2,Cincinnati,NB,Downtown Core,39.0985993,-84.5096158
 I-71,I71_CIN_3,Cincinnati,NB,North Metro Exit (I-275),39.26536784,-84.35717718
