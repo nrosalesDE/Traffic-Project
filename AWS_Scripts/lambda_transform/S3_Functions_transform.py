@@ -1,0 +1,76 @@
+import pandas as pd
+import json
+import os
+import boto3
+import io
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+s3 = boto3.client("s3")
+
+bucket_name = os.environ["bucket_name"]
+s3_folder_transformed = os.environ["s3_folder_transformed"]
+s3_folder_errors = os.environ["s3_folder_errors"]
+
+
+def upload_invalid_rows_to_s3(invalid_rows):
+
+    file_name = f"{invalid_rows['Corridor'].iloc[0]}_{invalid_rows['Time_ID'].iloc[0]}_invalid_rows.csv"
+    s3_key = f"{s3_folder_errors}/{file_name}"
+
+    buffer = io.StringIO()
+    invalid_rows.to_csv(buffer, index=False)
+
+    try:
+        s3.put_object(Bucket=bucket_name, Key=s3_key,
+                      Body=buffer.getvalue(), ContentType="text/csv")
+        logger.info(f"Invalid rows uploaded to S3 at {s3_key}.")
+    except Exception as e:
+        logger.error(f"Error uploading invalid rows to S3: {e}")
+
+    logger.info(f"Invalid rows uploaded to S3 at {s3_key}.")
+
+
+def upload_out_of_bounds_rows_to_s3(out_of_bounds_rows):
+    file_name = f"{out_of_bounds_rows['Corridor'].iloc[0]}_{out_of_bounds_rows['Time_ID'].iloc[0]}_out_of_bounds_rows.csv"
+    s3_key = f"{s3_folder_errors}/{file_name}"
+
+    buffer = io.StringIO()
+    out_of_bounds_rows.to_csv(buffer, index=False)
+
+    try:
+        s3.put_object(Bucket=bucket_name, Key=s3_key,
+                      Body=buffer.getvalue(), ContentType="text/csv")
+        logger.info(f"Out-of-bounds rows uploaded to S3 at {s3_key}.")
+    except Exception as e:
+        logger.error(f"Error uploading out-of-bounds rows to S3: {e}")
+
+
+def upload_transformed_parquet_to_s3(df):
+    corridor = df['Corridor'].iloc[0]
+    year = df['Year'].iloc[0]
+    month = f"{int(df['Month'].iloc[0]):02d}"
+    day = f"{int(df['Day'].iloc[0]):02d}"
+    hour = f"{int(df['Hour'].iloc[0]):02d}"
+    minute = f"{int(df['Minute'].iloc[0]):02d}"
+
+    s3_key = (
+        f"{s3_folder_transformed}/"
+        f"corridor={corridor}/"
+        f"year={year}/"
+        f"month={month}/"
+        f"day={day}/"
+        f"hour={hour}/"
+        f"transformed_{minute}.parquet"
+    )
+    buffer = io.BytesIO()
+    df.to_parquet(buffer, index=False)
+
+    try:
+        s3.put_object(Bucket=bucket_name, Key=s3_key, Body=df.to_parquet(
+        ), ContentType="application/octet-stream")
+        logger.info(f"Transformed parquet uploaded to S3 at {s3_key}.")
+    except Exception as e:
+        logger.error(f"Error uploading transformed parquet to S3: {e}")

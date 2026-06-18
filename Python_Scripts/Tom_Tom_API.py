@@ -27,7 +27,7 @@ def Run_Extraction():
 
     # LOAD INPUT VIA POINTS
     corridors = pd.read_csv(
-        r"C:\GitRepos\Traffic-Project\Config\Corridor_Data_v2.csv")
+        r"C:\GitRepos\Traffic-Project\AWS_Scripts\lambda_extract\Config\Corridor_Data_v2.csv")
 
     # START OF LOOP. FIRST ARRANGED BY CORRIDOR AND THEN BY POINT. EXAMPLE "I-71 HAS 14 POINTS TO RUN THROUGH"
     for corridor_name, corridor_df in corridors.groupby("Corridor"):
@@ -87,3 +87,6 @@ def Run_Extraction():
 
     logging.info(f"Pipeline finished")
     logging.info(f"Runtime: {Run_Time:.2f} seconds")
+
+
+Run_Extraction()
