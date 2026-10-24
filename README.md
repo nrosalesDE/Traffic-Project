@@ -17,8 +17,8 @@
 | | |
 |---|---|
 | **Role** | [Solo Developer] |
-| **Timeline** | [May 2026 – Present] |
-| **Status** | [In Progress] |
+| **Timeline** | [May 2026 – June 2026] |
+| **Status** | [Complete] |
 
 ---
 
